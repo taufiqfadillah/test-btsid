@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { AuthContext } from './AuthContext';
 
 const BASE_URL = 'http://94.74.86.174:8080/api';
-const AUTH_TOKEN = 'eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6W119.i2OVQdxr08dmIqwP7cWOJk5Ye4fySFUqofl-w6FKbm4EwXTStfm0u-sGhDvDVUqNG8Cc7STtUJlawVAP057Jlg';
 
 const ChecklistApp = () => {
   const [checklists, setChecklists] = useState([]);
   const [newChecklistName, setNewChecklistName] = useState('');
   const [editChecklistId, setEditChecklistId] = useState(null);
   const [editChecklistName, setEditChecklistName] = useState('');
+  const { authToken } = useContext(AuthContext);
 
   const fetchChecklists = () => {
     axios
       .get(`${BASE_URL}/checklist`, {
-        headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
+        headers: { Authorization: `Bearer ${authToken}` },
       })
       .then((response) => {
         if (Array.isArray(response.data.data)) {
@@ -33,7 +34,7 @@ const ChecklistApp = () => {
         `${BASE_URL}/checklist`,
         { name: newChecklistName },
         {
-          headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         }
       )
       .then(() => {
@@ -48,7 +49,7 @@ const ChecklistApp = () => {
   const deleteChecklist = (id) => {
     axios
       .delete(`${BASE_URL}/checklist/${id}`, {
-        headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
+        headers: { Authorization: `Bearer ${authToken}` },
       })
       .then(() => {
         fetchChecklists();
@@ -74,7 +75,7 @@ const ChecklistApp = () => {
         `${BASE_URL}/checklist/${editChecklistId}/item/rename/${id}`,
         { itemName: editChecklistName },
         {
-          headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
+          headers: { Authorization: `Bearer ${authToken}` },
         }
       )
       .then(() => {
@@ -82,13 +83,34 @@ const ChecklistApp = () => {
         cancelEditing();
       })
       .catch((error) => {
-        console.error(`Error updating checklist with id ${editChecklistId}`, error);
+        if (error.message === 'Network Error') {
+          console.error('Terdapat masalah jaringan. Silakan periksa koneksi Anda.');
+        } else {
+          console.error(`Error updating checklist with id ${editChecklistId}`, error);
+        }
       });
   };
 
   useEffect(() => {
+    const fetchChecklists = () => {
+      axios
+        .get(`${BASE_URL}/checklist`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        })
+        .then((response) => {
+          if (Array.isArray(response.data.data)) {
+            setChecklists(response.data.data);
+          } else {
+            console.error('Invalid response data. Expected an array:', response.data);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching checklists', error);
+        });
+    };
+
     fetchChecklists();
-  }, []);
+  }, [authToken]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -100,16 +122,16 @@ const ChecklistApp = () => {
             editChecklistId === checklist.id ? (
               <li key={checklist.id} style={{ border: '1px solid black', margin: '10px 0', padding: '10px' }}>
                 <input type="text" value={editChecklistName} onChange={(e) => setEditChecklistName(e.target.value)} />
-                <button onClick={updateChecklist}>💾</button>
-                <button onClick={cancelEditing}>❌</button>
+                <i onClick={updateChecklist}>💾</i>
+                <i onClick={cancelEditing}>❌</i>
               </li>
             ) : (
               <li key={checklist.id} style={{ border: '1px solid black', margin: '10px 0', padding: '10px' }}>
                 {checklist.name}
-                <button style={{ marginLeft: '10px' }} onClick={() => startEditing(checklist.id, checklist.name)}>
+                <i style={{ marginLeft: '10px' }} onClick={() => startEditing(checklist.id, checklist.name)}>
                   ✏️
-                </button>
-                <button onClick={() => deleteChecklist(checklist.id)}>🗑️</button>
+                </i>
+                <i onClick={() => deleteChecklist(checklist.id)}>🗑️</i>
               </li>
             )
           )}
