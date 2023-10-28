@@ -255,3 +255,20 @@ footer a {
   color: #3c97bf;
   text-decoration: none;
 }
+
+@media screen and (max-width: 600px) {
+  .container {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .form-container,
+  .sign-in-container,
+  .sign-up-container {
+    width: 100%;
+  }
+
+  .overlay-container {
+    display: none;
+  }
+}

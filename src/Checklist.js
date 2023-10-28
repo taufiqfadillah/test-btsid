@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { AuthContext } from './AuthContext';
 
@@ -9,7 +9,7 @@ const ChecklistApp = () => {
   const [newChecklistName, setNewChecklistName] = useState('');
   const { authToken } = useContext(AuthContext);
 
-  const fetchChecklists = () => {
+  const fetchChecklists = useCallback(() => {
     axios
       .get(`${BASE_URL}/checklist`, {
         headers: { Authorization: `Bearer ${authToken}` },
@@ -28,9 +28,9 @@ const ChecklistApp = () => {
       .catch((error) => {
         console.error('Error fetching checklists', error);
       });
-  };
+  }, [authToken]);
 
-  const createChecklist = () => {
+  const createChecklist = useCallback(() => {
     axios
       .post(
         `${BASE_URL}/checklist`,
@@ -46,44 +46,27 @@ const ChecklistApp = () => {
       .catch((error) => {
         console.error('Error creating checklist', error);
       });
-  };
+  }, [authToken, newChecklistName, fetchChecklists]);
 
-  const deleteChecklist = (id) => {
-    axios
-      .delete(`${BASE_URL}/checklist/${id}`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      })
-      .then(() => {
-        fetchChecklists();
-      })
-      .catch((error) => {
-        console.error(`Error deleting checklist with id ${id}`, error);
-      });
-  };
-
-  useEffect(() => {
-    const fetchChecklists = () => {
+  const deleteChecklist = useCallback(
+    (id) => {
       axios
-        .get(`${BASE_URL}/checklist`, {
+        .delete(`${BASE_URL}/checklist/${id}`, {
           headers: { Authorization: `Bearer ${authToken}` },
         })
-        .then((response) => {
-          if (Array.isArray(response.data.data)) {
-            const updatedChecklists = response.data.data.map((checklist) => ({
-              ...checklist,
-              name: checklist.name,
-            }));
-            setChecklists(updatedChecklists);
-          } else {
-            console.error('Invalid response data. Expected an array:', response.data);
-          }
+        .then(() => {
+          fetchChecklists();
         })
         .catch((error) => {
-          console.error('Error fetching checklists', error);
+          console.error(`Error deleting checklist with id ${id}`, error);
         });
-    };
+    },
+    [authToken, fetchChecklists]
+  );
+
+  useEffect(() => {
     fetchChecklists();
-  }, [authToken]);
+  }, [fetchChecklists]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>

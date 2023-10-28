@@ -5,8 +5,8 @@ import { AuthContext } from './AuthContext';
 
 const BASE_URL = 'http://94.74.86.174:8080/api';
 
-function SignInForm({ onLogin }) {
-  const { setAuthToken } = useContext(AuthContext);
+function SignInForm() {
+  const { setAuthToken, setIsLoggedIn } = useContext(AuthContext);
   const [state, setState] = React.useState({
     username: '',
     password: '',
@@ -28,7 +28,7 @@ function SignInForm({ onLogin }) {
       .post(`${BASE_URL}/login`, { username: username, password })
       .then((response) => {
         setAuthToken(response.data.data.token);
-        onLogin();
+        setIsLoggedIn(true);
         alert('Login Successfully');
       })
       .catch((error) => {
@@ -50,7 +50,7 @@ function SignInForm({ onLogin }) {
         <h1>Sign in</h1>
         <span>or use your account</span>
         <input type="text" placeholder="Uername" name="username" value={state.username} onChange={handleChange} />
-        <input type="password" name="password" placeholder="Password" value={state.password} onChange={handleChange} />
+        <input type="password" name="password" placeholder="Password" value={state.password} onChange={handleChange} autoComplete="current-password" />
         <button>Sign In</button>
       </form>
     </div>

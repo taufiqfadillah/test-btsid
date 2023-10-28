@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ChecklistApp from './Checklist';
 import ChecklistItem from './ChecklistItem';
 import Auth from './Auth';
-import { AuthProvider } from './AuthContext';
+import { AuthContext } from './AuthContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn, setIsLoggedIn } = React.useContext(AuthContext);
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
+  const handleLogout = () => {
+    setIsLoggedIn(false);
   };
 
   return (
-    <AuthProvider>
-      <Router>
-        <div style={{ textAlign: 'center' }}>
-          <h1 style={{ paddingBottom: '50px' }}>Checklist App BTSID</h1>
-          <div style={{ display: 'flex', justifyContent: 'space-around', gap: '2rem' }}>
-            <Routes>
-              <Route path="/" element={isLoggedIn ? <ChecklistApp /> : <Auth onLogin={handleLogin} />} />
-              {isLoggedIn && <Route path="/checklist" element={<ChecklistApp />} />}
-            </Routes>
-            {isLoggedIn && <ChecklistItem />}
-          </div>
+    <Router>
+      <div style={{ textAlign: 'center' }}>
+        <h1 style={{ paddingBottom: '50px' }}>Checklist App BTSID</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem' }}>
+          <Routes>
+            <Route path="/" element={isLoggedIn ? <ChecklistApp /> : <Auth />} />
+            {isLoggedIn && <Route path="/checklist" element={<ChecklistApp />} />}
+          </Routes>
+          {isLoggedIn && <ChecklistItem />}
+          {isLoggedIn && (
+            <button onClick={handleLogout} style={{ position: 'absolute', top: '15px', right: '15px' }}>
+              Logout
+            </button>
+          )}
         </div>
-      </Router>
-    </AuthProvider>
+      </div>
+    </Router>
   );
 }
 
