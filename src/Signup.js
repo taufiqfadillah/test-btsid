@@ -44,11 +44,11 @@ function SignUpForm() {
     <div className="form-container sign-up-container">
       <form onSubmit={handleOnSubmit}>
         <h1>Create Account</h1>
-        <span>or use your email for registration</span>
+        <span style={{ marginBottom: '10px' }}>or use your email for registration</span>
         <input type="text" name="username" value={state.username} onChange={handleChange} placeholder="Username" />
         <input type="email" name="email" value={state.email} onChange={handleChange} placeholder="Email" />
         <input type="password" name="password" value={state.password} onChange={handleChange} placeholder="Password" autoComplete="current-password" />
-        <button>Sign Up</button>
+        <button style={{ marginTop: '10px' }}>Sign Up</button>
       </form>
     </div>
   );
